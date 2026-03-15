@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuickClips</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 480px; min-height: 100vh; background: #000; position: relative; display: flex; flex-direction: column; }
+        
+        /* Auth */
+        #authModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        #authModal.hidden { display: none; }
+        .auth-box { background: #111; border-radius: 16px; padding: 30px; width: 100%; max-width: 400px; border: 1px solid #333; }
+        .auth-logo { font-size: 32px; font-weight: 800; margin-bottom: 25px; text-align: center; background: linear-gradient(135deg, #00f2ea, #ff0050); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #aaa; }
+        .form-group input { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; font-size: 15px; }
+        .form-group input:focus { outline: none; border-color: #fe2c55; }
+        .auth-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #fe2c55, #ff5c7c); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .auth-switch { text-align: center; margin-top: 20px; color: #888; font-size: 14px; }
+        .auth-switch a { color: #00f2ea; text-decoration: none; }
+        .auth-error { color: #fe2c55; font-size: 13px; margin-top: 8px; display: none; }
+        .hidden { display: none !important; }
+
+        /* Feed */
+        .video-feed { flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
+        .video-feed::-webkit-scrollbar { display: none; }
+        .video-card { height: 100vh; width: 100%; position: relative; scroll-snap-align: start; background: #111; }
+        .video-player { width: 100%; height: 100%; object-fit: cover; }
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; color: rgba(255,255,255,0.8); display: none; }
+        
+        /* Sidebar */
+        .overlay-sidebar { position: absolute; right: 12px; bottom: 100px; display: flex; flex-direction: column; gap: 22px; z-index: 20; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; color: #fff; cursor: pointer; }
+        .action-btn .icon-wrapper { width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); margin-bottom: 4px; }
+        .action-btn i { font-size: 24px; }
+        .action-btn.liked .icon-wrapper { background: rgba(254,44,85,0.2); }
+        .action-btn.liked i { color: #fe2c55; }
+        .action-btn span { font-size: 11px; font-weight: 500; margin-top: 2px; }
+        
+        /* Info */
+        .video-info { position: absolute; bottom: 90px; left: 12px; right: 70px; z-index: 20; }
+        .username { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+        .caption { font-size: 14px; line-height: 1.4; margin-bottom: 8px; }
+        
+        /* Nav */
+        .bottom-nav { height: 65px; background: #000; border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; position: fixed; bottom: 0; width: 100%; max-width: 480px; z-index: 30; }        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; cursor: pointer; }
+        .nav-item.active { color: #fff; }
+        .nav-item i { font-size: 22px; margin-bottom: 2px; }
+        .nav-item span { font-size: 10px; }
+        .nav-upload { width: 50px; height: 32px; background: linear-gradient(135deg, #00f2ea, #ff0050); border-radius: 8px; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 18px; }
+
+        /* Upload */
+        #uploadModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 500; display: none; flex-direction: column; }
+        #uploadModal.active { display: flex; }
+        .upload-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #222; }
+        .upload-header button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+        .upload-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; border: 3px dashed #333; margin: 20px; border-radius: 16px; cursor: pointer; }
+        .upload-area:hover { border-color: #fe2c55; }
+        .upload-area i { font-size: 60px; color: #555; margin-bottom: 20px; }
+        .preview-container { display: none; padding: 20px; }
+        .preview-video { width: 100%; border-radius: 12px; margin-bottom: 15px; max-height: 60vh; }
+        .upload-form textarea, .upload-form input { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; font-size: 14px; margin-bottom: 12px; }
+        .upload-form textarea { height: 80px; }
+        .upload-btn { width: 100%; padding: 16px; background: #fe2c55; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .upload-btn:disabled { background: #444; cursor: not-allowed; }
+        .progress-bar { width: 100%; height: 4px; background: #222; border-radius: 2px; margin: 15px 20px; overflow: hidden; display: none; }
+        .progress-fill { height: 100%; background: #00f2ea; width: 0%; transition: width 0.3s; }
+        .upload-status { text-align: center; font-size: 13px; color: #888; margin: 0 20px 20px; }
+
+        /* Profile */
+        #profilePage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 400; display: none; flex-direction: column; overflow-y: auto; }
+        #profilePage.active { display: flex; }
+        .profile-header { padding: 50px 20px 20px; text-align: center; border-bottom: 1px solid #222; }
+        .profile-pic { width: 100px; height: 100px; border-radius: 50%; background: #222; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 40px; color: #666; border: 3px solid #fe2c55; }
+        .profile-username { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
+        .profile-bio { color: #aaa; font-size: 14px; margin-bottom: 20px; }
+        .profile-stats { display: flex; justify-content: center; gap: 40px; margin-bottom: 20px; }
+        .profile-stats .stat { text-align: center; }
+        .profile-stats .stat-value { font-size: 18px; font-weight: 700; }
+        .profile-stats .stat-label { font-size: 12px; color: #777; }
+        .profile-btn { padding: 10px 24px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; background: #fe2c55; color: #fff; }
+        .profile-videos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; }
+        .profile-video-item { aspect-ratio: 9/16; background: #111; }
+        .profile-video-item video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Utils */
+        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #888; }
+        .empty-state { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #888; padding: 20px; }
+        .empty-state i { font-size: 50px; margin-bottom: 15px; opacity: 0.5; }
+        .empty-state button { margin-top: 15px; padding: 10px 20px; background: #fe2c55; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+        #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 1000; display: none; }
+        #toast.show { display: block; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    </style>
+</head><body>
+
+    <!-- Auth -->
+    <div id="authModal">
+        <div class="auth-box">
+            <div class="auth-logo">QuickClips</div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <div class="auth-error" id="loginError"></div>
+                <button type="submit" class="auth-btn">Login</button>
+            </form>
+            <form id="signupForm" class="hidden">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="signupUsername" required placeholder="cool_user">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" required placeholder="••••••••" minlength="6">
+                </div>
+                <div class="auth-error" id="signupError"></div>
+                <button type="submit" class="auth-btn">Create Account</button>
+            </form>
+            <div class="auth-switch">
+                <span id="switchText">New here? </span>
+                <a id="switchLink">Create account</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- App -->
+    <div class="app-container">
+        <div class="video-feed" id="videoFeed">
+            <div class="loading">Loading... 🎬</div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active"><i class="fas fa-home"></i><span>Home</span></div>
+            <div class="nav-item"><i class="fas fa-compass"></i><span>Discover</span></div>            <div class="nav-item" onclick="openUpload()"><div class="nav-upload"><i class="fas fa-plus"></i></div></div>
+            <div class="nav-item"><i class="fas fa-inbox"></i><span>Inbox</span></div>
+            <div class="nav-item" onclick="showProfile()"><i class="fas fa-user"></i><span>Profile</span></div>
+        </div>
+
+        <!-- Upload -->
+        <div id="uploadModal">
+            <div class="upload-header">
+                <button onclick="closeUpload()"><i class="fas fa-times"></i></button>
+                <span style="font-weight:600">Upload</span>
+                <div style="width:24px"></div>
+            </div>
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-video"></i>
+                <p>Tap to select video</p>
+                <p style="font-size:12px;color:#666;margin-top:8px">MP4, Max 50MB</p>
+            </div>
+            <div class="preview-container" id="previewContainer">
+                <video class="preview-video" id="previewVideo" controls></video>
+                <form class="upload-form" id="uploadForm">
+                    <textarea id="caption" placeholder="Write a caption..."></textarea>
+                    <input type="text" id="hashtags" placeholder="#hashtags">
+                    <button type="submit" class="upload-btn" id="uploadBtn" disabled>Upload</button>
+                </form>
+            </div>
+            <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="upload-status" id="uploadStatus"></div>
+        </div>
+
+        <!-- Profile -->
+        <div id="profilePage">
+            <div class="profile-header">
+                <div class="profile-pic"><i class="fas fa-user"></i></div>
+                <div class="profile-username" id="profileUsername">@username</div>
+                <div class="profile-bio" id="profileBio">No bio yet</div>
+                <div class="profile-stats">
+                    <div class="stat"><div class="stat-value" id="profileFollowers">0</div><div class="stat-label">Followers</div></div>
+                    <div class="stat"><div class="stat-value" id="profileFollowing">0</div><div class="stat-label">Following</div></div>
+                    <div class="stat"><div class="stat-value" id="profileLikes">0</div><div class="stat-label">Likes</div></div>
+                </div>
+                <button class="profile-btn" onclick="logout()">Logout</button>
+            </div>
+            <div class="profile-videos" id="profileVideos"></div>
+        </div>
+
+        <div id="toast"></div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <script>
+        // Firebase Config
+        var firebaseConfig = {
+            apiKey: "AIzaSyCHZ4_PhE2gbJBDzipArubqJpHW88Alw5o",
+            authDomain: "tournament-62f77.firebaseapp.com",
+            projectId: "tournament-62f77",
+            storageBucket: "tournament-62f77.firebasestorage.app",
+            messagingSenderId: "59905181993",
+            appId: "1:59905181993:web:8ad4f721ac50c09c478f38"
+        };
+
+        // Initialize
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        var auth = firebase.auth();
+        var db = firebase.firestore();
+        var storage = firebase.storage();
+
+        var currentUser = null;
+        var selectedVideoFile = null;
+
+        // Utils
+        function formatNumber(num) {
+            if (num >= 1000000) { return (num/1000000).toFixed(1)+'M'; }
+            if (num >= 1000) { return (num/1000).toFixed(1)+'K'; }
+            return num.toString();
+        }
+
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(function() { t.classList.remove('show'); }, 3000);
+        }
+
+        function getAuthError(code) {
+            var m = {
+                'auth/invalid-email': '❌ Invalid email',
+                'auth/user-not-found': '❌ User not found',
+                'auth/wrong-password': '❌ Wrong password',
+                'auth/email-already-in-use': '❌ Email exists',
+                'auth/weak-password': '❌ Min 6 chars',
+                'permission-denied': '❌ Check Firebase Rules'
+            };
+            return m[code] || '❌ '+code;
+        }
+        // Auth Switch
+        document.getElementById('switchLink').onclick = function(e) {
+            e.preventDefault();
+            var l = document.getElementById('loginForm');
+            var s = document.getElementById('signupForm');
+            if (l.classList.contains('hidden')) {
+                l.classList.remove('hidden'); s.classList.add('hidden');
+                document.getElementById('switchText').textContent = 'New here? ';
+                document.getElementById('switchLink').textContent = 'Create account';
+            } else {
+                l.classList.add('hidden'); s.classList.remove('hidden');
+                document.getElementById('switchText').textContent = 'Already have account? ';
+                document.getElementById('switchLink').textContent = 'Login';
+            }
+        };
+
+        // Login
+        document.getElementById('loginForm').onsubmit = function(e) {
+            e.preventDefault();
+            auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)
+                .then(function() { showToast('Welcome! 👋'); })
+                .catch(function(err) { 
+                    document.getElementById('loginError').textContent = getAuthError(err.code); 
+                    document.getElementById('loginError').style.display = 'block'; 
+                });
+        };
+
+        // Signup
+        document.getElementById('signupForm').onsubmit = function(e) {
+            e.preventDefault();
+            var u = document.getElementById('signupUsername').value;
+            var em = document.getElementById('signupEmail').value;
+            var p = document.getElementById('signupPassword').value;
+            auth.createUserWithEmailAndPassword(em, p)
+                .then(function(uc) {
+                    return db.collection('users').doc(uc.user.uid).set({
+                        uid: uc.user.uid,
+                        username: u,
+                        email: em,
+                        photoURL: '',
+                        bio: '',
+                        followersCount: 0,
+                        followingCount: 0,
+                        likesCount: 0,
+                        videoCount: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(function() { showToast('Account created! 🎉'); })
+                .catch(function(err) {                     document.getElementById('signupError').textContent = getAuthError(err.code); 
+                    document.getElementById('signupError').style.display = 'block'; 
+                });
+        };
+
+        // Auth State
+        auth.onAuthStateChanged(function(user) {
+            currentUser = user;
+            if (user) {
+                document.getElementById('authModal').classList.add('hidden');
+                loadUserProfile();
+                loadVideos();
+            } else {
+                document.getElementById('authModal').classList.remove('hidden');
+                document.getElementById('videoFeed').innerHTML = '<div class="loading">Please login 🔐</div>';
+            }
+        });
+
+        // Logout
+        function logout() { 
+            auth.signOut().then(function() { 
+                showToast('Logged out'); 
+                closeProfile(); 
+            }); 
+        }
+
+        // Load Videos
+        function loadVideos() {
+            var f = document.getElementById('videoFeed');
+            db.collection('videos').orderBy('createdAt','desc').limit(10).get()
+                .then(function(s) {
+                    if (s.empty) { 
+                        f.innerHTML = '<div class="empty-state"><i class="fas fa-video-slash"></i><p>No videos yet</p></div>'; 
+                        return; 
+                    }
+                    f.innerHTML = '';
+                    s.forEach(function(d) { createVideoCard(d.data(), d.id); });
+                    setupVideoObservers();
+                })
+                .catch(function(err) { 
+                    console.error(err); 
+                    f.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading videos</p><p style="font-size:12px;margin-top:10px">Check Firebase Rules!</p><button onclick="loadVideos()">Retry</button></div>'; 
+                });
+        }
+
+        // Create Video Card
+        function createVideoCard(v, id) {
+            var f = document.getElementById('videoFeed');
+            var c = document.createElement('div');
+            c.className = 'video-card';            c.innerHTML = '<video class="video-player" src="'+v.videoURL+'" loop playsinline></video><div class="play-icon"><i class="fas fa-play-circle"></i></div><div class="video-info"><div class="username">'+(v.username||'@user')+'</div><div class="caption">'+(v.caption||'')+'</div></div><div class="overlay-sidebar"><div class="action-btn" onclick="toggleLike(\''+id+'\',this)"><div class="icon-wrapper"><i class="far fa-heart"></i></div><span class="like-count">'+formatNumber(v.likesCount||0)+'</span></div><div class="action-btn" onclick="showToast(\'Comments soon!\')"><div class="icon-wrapper"><i class="far fa-comment"></i></div><span>'+formatNumber(v.commentsCount||0)+'</span></div><div class="action-btn" onclick="shareVideo(\''+id+'\')"><div class="icon-wrapper"><i class="fas fa-share"></i></div><span>Share</span></div></div>';
+            f.appendChild(c);
+            var ve = c.querySelector('.video-player');
+            var pi = c.querySelector('.play-icon');
+            ve.onclick = function() { 
+                if(ve.paused){ve.play().catch(function(){});pi.style.display='none';}
+                else{ve.pause();pi.style.display='block';} 
+            };
+        }
+
+        // Video Observer
+        function setupVideoObservers() {
+            var vs = document.querySelectorAll('.video-player');
+            var o = new IntersectionObserver(function(es) { 
+                es.forEach(function(e) { 
+                    if(e.isIntersecting){e.target.play().catch(function(){});}
+                    else{e.target.pause();e.target.currentTime=0;} 
+                }); 
+            }, {threshold:0.7});
+            vs.forEach(function(v) { o.observe(v); });
+        }
+
+        // Like
+        function toggleLike(vid, btn) {
+            if(!currentUser){showToast('Login to like');return;}
+            var i = btn.querySelector('i');
+            var cs = btn.querySelector('.like-count');
+            var liked = btn.classList.contains('liked');
+            var c = parseInt(cs.textContent.replace(/[^0-9]/g,''))||0;
+            if(!liked){
+                btn.classList.add('liked');i.classList.remove('far');i.classList.add('fas');c++;
+                db.collection('videos').doc(vid).update({likesCount:firebase.firestore.FieldValue.increment(1)});
+            } else {
+                btn.classList.remove('liked');i.classList.remove('fas');i.classList.add('far');c--;
+                db.collection('videos').doc(vid).update({likesCount:firebase.firestore.FieldValue.increment(-1)});
+            }
+            cs.textContent = formatNumber(c);
+        }
+
+        // Share
+        function shareVideo(vid) {
+            var u = window.location.href.split('#')[0]+'?v='+vid;
+            if(navigator.share){navigator.share({title:'Check this!',url:u}).catch(function(){});}
+            else{navigator.clipboard.writeText(u);showToast('Link copied! 🔗');}
+        }
+
+        // Upload
+        function openUpload() { 
+            if(!currentUser){showToast('Login to upload');return;} 
+            document.getElementById('uploadModal').classList.add('active');         }
+        function closeUpload() { 
+            document.getElementById('uploadModal').classList.remove('active'); 
+            resetUpload(); 
+        }
+        function resetUpload() { 
+            selectedVideoFile=null; 
+            document.getElementById('uploadArea').style.display='flex'; 
+            document.getElementById('previewContainer').style.display='none'; 
+            document.getElementById('previewVideo').src=''; 
+            document.getElementById('caption').value=''; 
+            document.getElementById('hashtags').value=''; 
+            document.getElementById('uploadBtn').disabled=true; 
+            document.getElementById('progressBar').style.display='none'; 
+            document.getElementById('progressFill').style.width='0%'; 
+            document.getElementById('uploadStatus').textContent=''; 
+        }
+
+        // File Select
+        document.getElementById('uploadArea').onclick = function() {
+            var inp = document.createElement('input');
+            inp.type = 'file'; inp.accept = 'video/*';
+            inp.onchange = function(e) {
+                var f = e.target.files[0];
+                if(f && f.type.startsWith('video/')) {
+                    if(f.size > 50*1024*1024){showToast('Max 50MB!');return;}
+                    selectedVideoFile = f;
+                    document.getElementById('previewVideo').src = URL.createObjectURL(f);
+                    document.getElementById('uploadArea').style.display = 'none';
+                    document.getElementById('previewContainer').style.display = 'block';
+                    document.getElementById('uploadBtn').disabled = false;
+                }
+            };
+            inp.click();
+        };
+
+        // Upload Submit
+        document.getElementById('uploadForm').onsubmit = function(e) {
+            e.preventDefault();
+            if(!selectedVideoFile || !currentUser) return;
+            var cap = document.getElementById('caption').value;
+            var ht = document.getElementById('hashtags').value;
+            var btn = document.getElementById('uploadBtn');
+            var pf = document.getElementById('progressFill');
+            var st = document.getElementById('uploadStatus');
+            btn.disabled = true;
+            document.getElementById('progressBar').style.display = 'block';
+            st.textContent = 'Uploading...';
+            var fn = 'videos/'+currentUser.uid+'/'+Date.now()+'_'+selectedVideoFile.name;
+            var sr = storage.ref(fn);            var ut = sr.put(selectedVideoFile);
+            ut.on('state_changed', 
+                function(s) { 
+                    var p = (s.bytesTransferred/s.totalBytes)*100; 
+                    pf.style.width = p+'%'; 
+                    st.textContent = 'Uploading: '+Math.round(p)+'%'; 
+                }, 
+                function(err) { 
+                    console.error(err); 
+                    st.textContent = 'Failed ❌'; 
+                    btn.disabled = false; 
+                }, 
+                function() {
+                    ut.snapshot.ref.getDownloadURL().then(function(vu) {
+                        return db.collection('videos').add({
+                            userId:currentUser.uid,
+                            username:currentUser.email?currentUser.email.split('@')[0]:'@user',
+                            videoURL:vu,
+                            caption:cap,
+                            hashtags:ht.split(' ').filter(function(t){return t.startsWith('#');}),
+                            likesCount:0,
+                            commentsCount:0,
+                            createdAt:firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }).then(function() {
+                        return db.collection('users').doc(currentUser.uid).update({
+                            videoCount:firebase.firestore.FieldValue.increment(1)
+                        });
+                    }).then(function() {
+                        st.textContent = 'Success! ✅';
+                        setTimeout(function() { closeUpload(); loadVideos(); showToast('Uploaded! 🎬'); }, 1000);
+                    }).catch(function(err) { 
+                        console.error(err); 
+                        st.textContent = 'Error: '+err.message; 
+                        btn.disabled = false; 
+                    });
+                }
+            );
+        };
+
+        // Profile
+        function showProfile() { 
+            if(!currentUser){showToast('Login first');return;} 
+            document.getElementById('profilePage').classList.add('active'); 
+            loadUserProfile(); 
+            loadUserVideos(); 
+        }
+        function closeProfile() { 
+            document.getElementById('profilePage').classList.remove('active'); 
+        }
+        function loadUserProfile() {
+            if(!currentUser) return;
+            db.collection('users').doc(currentUser.uid).get().then(function(d) {
+                if(d.exists) {
+                    var da = d.data();
+                    document.getElementById('profileUsername').textContent = '@'+(da.username||'user');
+                    document.getElementById('profileBio').textContent = da.bio||'No bio yet';
+                    document.getElementById('profileFollowers').textContent = formatNumber(da.followersCount||0);
+                    document.getElementById('profileFollowing').textContent = formatNumber(da.followingCount||0);
+                    document.getElementById('profileLikes').textContent = formatNumber(da.likesCount||0);
+                }
+            }).catch(function(err) { console.error(err); });
+        }
+
+        function loadUserVideos() {
+            if(!currentUser) return;
+            var g = document.getElementById('profileVideos');
+            db.collection('videos').where('userId','==',currentUser.uid).orderBy('createdAt','desc').limit(20).get()
+                .then(function(s) {
+                    if(s.empty) { 
+                        g.innerHTML = '<div class="empty-state" style="grid-column:1/-1;position:relative;transform:none"><i class="fas fa-video"></i><p>No videos</p></div>'; 
+                        return; 
+                    }
+                    g.innerHTML = '';
+                    s.forEach(function(d) {
+                        var v = d.data();
+                        var i = document.createElement('div');
+                        i.className = 'profile-video-item';
+                        i.innerHTML = '<video src="'+v.videoURL+'" muted></video>';
+                        g.appendChild(i);
+                    });
+                })
+                .catch(function(err) { 
+                    console.error(err); 
+                    g.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Error</div>'; 
+                });
+        }
+
+        console.log('🚀 QuickClips Loaded!');
+        console.log('🔥 Project:', firebaseConfig.projectId);
+    </script>
+</body>
+</html>

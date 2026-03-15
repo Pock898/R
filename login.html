@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - QuickClips</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-container { width: 100%; max-width: 400px; padding: 40px; }
+        .logo { font-size: 32px; font-weight: 800; margin-bottom: 30px; background: linear-gradient(to right, #00f2ea, #ff0050); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #888; }
+        .form-group input { width: 100%; padding: 15px; background: #111; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 16px; }
+        .form-group input:focus { outline: none; border-color: #fe2c55; }
+        .btn { width: 100%; padding: 15px; background: #fe2c55; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn:hover { background: #e0284a; }
+        .switch-form { text-align: center; margin-top: 20px; color: #888; }
+        .switch-form a { color: #fe2c55; text-decoration: none; }
+        .error-msg { color: #fe2c55; font-size: 14px; margin-top: 10px; display: none; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">QuickClips</div>
+        
+        <!-- Login Form -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <div class="error-msg" id="loginError"></div>
+            <button type="submit" class="btn">Login</button>
+            <div class="switch-form">
+                Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a>
+            </div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" class="hidden">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="signupUsername" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="signupEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signupPassword" required>
+            </div>
+            <div class="error-msg" id="signupError"></div>
+            <button type="submit" class="btn">Sign Up</button>
+            <div class="switch-form">
+                Already have an account? <a href="#" onclick="showLogin()">Login</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
