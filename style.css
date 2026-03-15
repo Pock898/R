@@ -1,0 +1,834 @@
+/* ============================================
+   QUICKCLIPS APP - COMPLETE STYLESHEET
+   Version: 1.0
+   Author: QuickClips Team
+   ============================================ */
+
+/* ============================================
+   1. RESET & BASE STYLES
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    touch-action: pan-y;
+}
+
+/* ============================================
+   2. APP CONTAINER
+   ============================================ */
+.app-container {
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================
+   3. AUTH MODAL (Login/Signup)
+   ============================================ */
+#authModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+#authModal.hidden {
+    display: none;
+}
+
+.auth-box {
+    background: #111;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #333;
+}
+
+.auth-logo {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 25px;
+    text-align: center;
+    background: linear-gradient(135deg, #00f2ea, #ff0050);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.auth-form .form-group {
+    margin-bottom: 18px;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 14px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #fff;    font-size: 15px;
+    transition: border-color 0.2s;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: #fe2c55;
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #fe2c55, #ff5c7c);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.auth-btn:active {
+    transform: scale(0.98);
+}
+
+.auth-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    color: #888;
+    font-size: 14px;
+}
+
+.auth-switch a {
+    color: #00f2ea;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+.auth-error {
+    color: #fe2c55;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   4. VIDEO FEED (TikTok Style Scroll)
+   ============================================ */
+.video-feed {
+    flex: 1;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.video-feed::-webkit-scrollbar {
+    display: none;
+}
+
+.video-card {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    scroll-snap-align: start;
+    background: #111;
+}
+
+.video-player {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 70px;
+    color: rgba(255, 255, 255, 0.8);
+    display: none;
+    pointer-events: none;    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   5. OVERLAY SIDEBAR (Like, Comment, Share)
+   ============================================ */
+.overlay-sidebar {
+    position: absolute;
+    right: 12px;
+    bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    z-index: 20;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    cursor: pointer;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.action-btn .icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    margin-bottom: 4px;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.action-btn:active .icon-wrapper {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(0.9);
+}
+
+.action-btn i {
+    font-size: 24px;
+    transition: color 0.2s;
+}
+
+.action-btn.liked .icon-wrapper {
+    background: rgba(254, 44, 85, 0.2);
+}
+.action-btn.liked i {
+    color: #fe2c55;
+    animation: heartBeat 0.3s ease;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+.action-btn span {
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* ============================================
+   6. VIDEO INFO (Username, Caption, Music)
+   ============================================ */
+.video-info {
+    position: absolute;
+    bottom: 90px;
+    left: 12px;
+    right: 70px;
+    z-index: 20;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.username {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.caption {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;    color: #ddd;
+}
+
+.music-tag i {
+    animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   7. BOTTOM NAVIGATION BAR
+   ============================================ */
+.bottom-nav {
+    height: 65px;
+    background: #000;
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 30;
+    padding: 0 10px;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #888;
+    cursor: pointer;
+    padding: 8px 4px;
+    transition: color 0.2s;
+}
+
+.nav-item.active {
+    color: #fff;
+}
+
+.nav-item i {
+    font-size: 22px;
+    margin-bottom: 2px;
+}
+
+.nav-item span {
+    font-size: 10px;
+    font-weight: 500;
+}
+.nav-upload {
+    width: 50px;
+    height: 32px;
+    background: linear-gradient(135deg, #00f2ea, #ff0050);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 18px;
+    transition: transform 0.1s;
+}
+
+.nav-upload:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   8. UPLOAD MODAL
+   ============================================ */
+#uploadModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 500;
+    display: none;
+    flex-direction: column;
+}
+
+#uploadModal.active {
+    display: flex;
+}
+
+.upload-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #222;
+}
+
+.upload-header button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;    cursor: pointer;
+    padding: 5px;
+}
+
+.upload-header button:active {
+    opacity: 0.7;
+}
+
+.upload-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    border: 3px dashed #333;
+    margin: 20px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.upload-area:hover {
+    border-color: #fe2c55;
+    background: rgba(254, 44, 85, 0.05);
+}
+
+.upload-area i {
+    font-size: 60px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.upload-area p {
+    color: #888;
+    font-size: 14px;
+}
+
+.preview-container {
+    display: none;
+    padding: 20px;
+}
+
+.preview-video {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    max-height: 60vh;
+    background: #111;
+}
+.upload-form textarea,
+.upload-form input {
+    width: 100%;
+    padding: 14px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+}
+
+.upload-form textarea:focus,
+.upload-form input:focus {
+    outline: none;
+    border-color: #fe2c55;
+}
+
+.upload-form textarea {
+    height: 80px;
+    resize: none;
+}
+
+.upload-btn {
+    width: 100%;
+    padding: 16px;
+    background: #fe2c55;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.upload-btn:active {
+    transform: scale(0.98);
+}
+
+.upload-btn:disabled {
+    background: #444;
+    cursor: not-allowed;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;    background: #222;
+    border-radius: 2px;
+    margin: 15px 20px;
+    overflow: hidden;
+    display: none;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f2ea, #ff0050);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.upload-status {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin: 0 20px 20px;
+}
+
+/* ============================================
+   9. PROFILE PAGE
+   ============================================ */
+#profilePage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 400;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#profilePage.active {
+    display: flex;
+}
+
+.profile-header {
+    padding: 50px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid #222;
+}
+
+.profile-pic {
+    width: 100px;
+    height: 100px;    border-radius: 50%;
+    background: #222;
+    margin: 0 auto 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    color: #666;
+    border: 3px solid #fe2c55;
+}
+
+.profile-username {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.profile-bio {
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 20px;
+}
+
+.profile-stats .stat {
+    text-align: center;
+}
+
+.profile-stats .stat-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.profile-stats .stat-label {
+    font-size: 12px;
+    color: #777;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.profile-btn {
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s;
+}
+
+.profile-btn:active {
+    opacity: 0.8;
+}
+
+.profile-btn.logout {
+    background: #fe2c55;
+    color: #fff;
+}
+
+.profile-btn.edit {
+    background: #333;
+    color: #fff;
+}
+
+.profile-videos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding: 2px;
+}
+
+.profile-video-item {
+    aspect-ratio: 9/16;
+    background: #111;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-video-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ============================================
+   10. LOADING & EMPTY STATES
+   ============================================ */
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;    transform: translate(-50%, -50%);
+    color: #888;
+    font-size: 15px;
+    text-align: center;
+}
+
+.empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #888;
+    padding: 20px;
+    width: 80%;
+}
+
+.empty-state i {
+    font-size: 50px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.empty-state button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #fe2c55;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.empty-state button:active {
+    opacity: 0.8;
+}
+
+/* ============================================
+   11. TOAST NOTIFICATIONS
+   ============================================ */
+#toast {
+    position: fixed;
+    bottom: 80px;    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+#toast.show {
+    display: block;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* ============================================
+   12. SCROLLBAR STYLING (Webkit)
+   ============================================ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #111;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}
+
+/* ============================================   13. RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 480px) {
+    .app-container {
+        max-width: 100%;
+    }
+    
+    .auth-box {
+        margin: 10px;
+        padding: 20px;
+    }
+    
+    .profile-stats {
+        gap: 25px;
+    }
+}
+
+@media (min-width: 481px) {
+    body {
+        padding: 20px;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .app-container {
+        height: 90vh;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* ============================================
+   14. ANIMATIONS
+   ============================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease;
+}
+
+/* ============================================
+   15. UTILITY CLASSES
+   ============================================ */
+.text-center {
+    text-align: center;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #00f2ea, #ff0050);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mb-10 { margin-bottom: 10px; }
+.mb-20 { margin-bottom: 20px; }
+
+/* ============================================
+   16. DARK MODE SUPPORT (Auto)
+   ============================================ */
+@media (prefers-color-scheme: light) {
+    /* Optional: Light mode styles if needed */
+    /* Currently app is dark mode only (like TikTok) */
+}
+
+/* ============================================
+   17. PRINT STYLES (Hide app when printing)
+   ============================================ */
+@media print {
+    body {
+        display: none;
+    }
+}
+
+/* ============================================
+   END OF STYLESHEET   ============================================ */
